@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Post - TheFrontend API Project</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Post page</p>
+      <h1 id="postPageHeader">Страница поста</h1>
+      <p class="muted">Отдельная страница статьи с подробностями, комментариями и формой обсуждения.</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-link" href="index.html">Панель</a>
+      <a class="nav-link active" href="showcase.html">Витрина</a>
+      <a class="nav-link" href="docs.html">Документация</a>
+      <a class="nav-link" href="examples.html">Код</a>
+    </nav>
+  </header>
+
+  <main class="post-page">
+    <a class="back-link" href="showcase.html">← Назад к витрине</a>
+
+    <section id="postPageStatus" class="showcase-status">Загружаем пост...</section>
+
+    <article class="panel post-detail">
+      <img id="postDetailImage" class="post-detail-image" src="" alt="">
+      <div class="post-detail-body">
+        <p class="eyebrow" id="postDetailMeta">Post</p>
+        <h2 id="postDetailTitle">Пост</h2>
+        <p id="postDetailDescription" class="post-detail-description"></p>
+        <div class="showcase-meta">
+          <span id="postDetailId">ID</span>
+          <span id="postDetailCategory">Category</span>
+        </div>
+      </div>
+    </article>
+
+    <section class="post-detail-grid">
+      <div class="panel">
+        <div class="panel-head compact">
+          <div>
+            <p class="eyebrow">Discussion</p>
+            <h2>Комментарии</h2>
+          </div>
+        </div>
+
+        <form id="postPageCommentForm" class="comment-compose">
+          <label class="field">
+            <span>Комментарий *</span>
+            <input name="comment" type="text" placeholder="Напишите комментарий">
+          </label>
+          <label class="field">
+            <span>comment_en *</span>
+            <input name="comment_en" type="text" placeholder="Write a comment">
+          </label>
+          <label class="field">
+            <span>parent_id</span>
+            <input name="parent_id" type="number" placeholder="Можно оставить пустым">
+          </label>
+          <button class="btn primary" type="submit">Отправить комментарий</button>
+        </form>
+
+        <div id="postPageComments"></div>
+      </div>
+
+      <aside class="panel">
+        <p class="eyebrow">API usage</p>
+        <h2>Что использует эта страница</h2>
+        <div class="steps">
+          <div><strong>1</strong><span>GET /post/{id}</span></div>
+          <div><strong>2</strong><span>GET /comment?post_id={id}</span></div>
+          <div><strong>3</strong><span>POST /comment</span></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/post-page.js"></script>
+</body>
+</html>

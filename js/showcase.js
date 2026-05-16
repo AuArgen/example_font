@@ -267,6 +267,7 @@ function renderPosts() {
         <span class="method-pill">POST #${escapeShowcaseHtml(post.id)}</span>
         <h3>${escapeShowcaseHtml(postTitle(post))}</h3>
         <p>${escapeShowcaseHtml(postDescription(post))}</p>
+        <a class="post-card-link" href="post.html?id=${encodeURIComponent(post.id)}">Открыть страницу поста</a>
       </div>
     </article>
   `).join('');

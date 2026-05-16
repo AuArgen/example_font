@@ -610,6 +610,64 @@ th {
   line-height: 1.6;
 }
 
+.post-card-link,
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  color: var(--green-dark);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.post-card-link:hover,
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.post-page {
+  display: grid;
+  gap: 22px;
+  padding: 24px clamp(18px, 4vw, 56px) 56px;
+}
+
+.post-detail {
+  overflow: hidden;
+  padding: 0;
+}
+
+.post-detail-image {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+}
+
+.post-detail-body {
+  padding: clamp(22px, 4vw, 42px);
+}
+
+.post-detail-body h2 {
+  max-width: 940px;
+  margin: 0;
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 1.05;
+}
+
+.post-detail-description {
+  max-width: 900px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.post-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 22px;
+  align-items: start;
+}
+
 .showcase-reader-image {
   display: block;
   width: 100%;
@@ -719,7 +777,8 @@ th {
   .form-grid,
   .showcase-hero,
   .showcase-layout,
-  .showcase-post-grid {
+  .showcase-post-grid,
+  .post-detail-grid {
     grid-template-columns: 1fr;
   }
 
