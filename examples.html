@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code Examples - TheFrontend API</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Code examples</p>
+      <h1>Примеры fetch-запросов</h1>
+      <p class="muted">Эти примеры можно вставить в любой простой frontend-проект.</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-link" href="index.html">Панель</a>
+      <a class="nav-link" href="showcase.html">Витрина</a>
+      <a class="nav-link" href="docs.html">Документация</a>
+      <a class="nav-link active" href="examples.html">Код</a>
+    </nav>
+  </header>
+
+  <main class="docs-layout">
+    <section class="panel">
+      <h2>Базовая функция</h2>
+      <pre class="json-box"><code>const API_BASE = "https://front.bilimai.kg/api";
+const TOKEN = "your_token";
+
+async function apiRequest(path, { method = "GET", body } = {}) {
+  const url = new URL(API_BASE + path);
+  url.searchParams.set("token", TOKEN);
+
+  const response = await fetch(url, {
+    method,
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const details = data?.errors
+      ? Object.entries(data.errors).map(([field, messages]) => `${field}: ${messages.join(", ")}`).join("\n")
+      : "";
+
+    throw new Error([data?.message || data?.error || `HTTP ${response.status}`, details].filter(Boolean).join("\n"));
+  }
+
+  return data;
+}</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>Category</h2>
+      <pre class="json-box"><code>await apiRequest("/category");
+
+await apiRequest("/category", {
+  method: "POST",
+  body: {
+    title: "Новости",
+    title_en: "News",
+    description: "Раздел новостей",
+    description_en: "News section",
+    image: "https://example.com/category.jpg",
+    parent_id: null
+  }
+});</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>Post</h2>
+      <pre class="json-box"><code>await apiRequest("/post");
+
+await apiRequest("/post", {
+  method: "POST",
+  body: {
+    category_id: 12,
+    title: "Первый пост",
+    title_en: "First post",
+    description: "Короткое описание",
+    description_en: "Short description",
+    image: "https://example.com/post.jpg",
+    image_en: "https://example.com/post-en.jpg",
+    client_id: null
+  }
+});</code></pre>
+    </section>
+
+    <section class="panel">
+      <h2>Comment</h2>
+      <pre class="json-box"><code>await apiRequest("/comment?post_id=34");
+
+await apiRequest("/comment", {
+  method: "POST",
+  body: {
+    post_id: 34,
+    comment: "Отличный материал",
+    comment_en: "Great article",
+    parent_id: null
+  }
+});</code></pre>
+    </section>
+  </main>
+</body>
+</html>

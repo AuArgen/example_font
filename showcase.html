@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Showcase - TheFrontend API Project</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar showcase-topbar">
+    <div>
+      <p class="eyebrow">Project showcase</p>
+      <h1>Какой красивый проект можно создать на этих API</h1>
+      <p class="muted">Пример публичного knowledge hub: категории, посты, изображения и комментарии собираются из API. Если ключи ещё не введены, страница показывает демо-данные.</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-link" href="index.html">Панель</a>
+      <a class="nav-link active" href="showcase.html">Витрина</a>
+      <a class="nav-link" href="docs.html">Документация</a>
+      <a class="nav-link" href="examples.html">Код</a>
+    </nav>
+  </header>
+
+  <main class="showcase-page">
+    <section class="showcase-hero">
+      <div class="showcase-hero-copy">
+        <p class="eyebrow">Live API idea</p>
+        <h2>Knowledge Hub для статей, уроков и новостей</h2>
+        <p>Этот экран показывает, как из ваших API можно собрать полноценный публичный сайт: категории сверху, посты карточками, выбранная статья справа и комментарии под ней.</p>
+        <div class="showcase-actions">
+          <a class="btn primary" href="index.html">Ввести API ключи</a>
+          <button class="btn ghost" id="reloadShowcaseBtn" type="button">Обновить данные</button>
+        </div>
+      </div>
+      <div class="showcase-hero-panel">
+        <span>Что использует страница</span>
+        <ul>
+          <li>GET /category</li>
+          <li>GET /post</li>
+          <li>GET /comment?post_id=ID</li>
+          <li>localStorage token</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="showcase-status" id="showcaseStatus">
+      Страница готова. Если API ключи сохранены на странице «Панель», будут загружены реальные данные.
+    </section>
+
+    <section class="showcase-layout">
+      <aside class="panel showcase-sidebar">
+        <div class="panel-head compact">
+          <div>
+            <p class="eyebrow">Categories</p>
+            <h2>Разделы</h2>
+          </div>
+        </div>
+        <div id="showcaseCategories" class="showcase-category-list"></div>
+
+        <form id="categoryCreateForm" class="context-form">
+          <h3>Новая категория</h3>
+          <label class="field"><span>title *</span><input name="title" type="text" placeholder="Новости"></label>
+          <label class="field"><span>title_en *</span><input name="title_en" type="text" placeholder="News"></label>
+          <label class="field"><span>description *</span><input name="description" type="text" placeholder="Раздел новостей"></label>
+          <label class="field"><span>description_en *</span><input name="description_en" type="text" placeholder="News section"></label>
+          <label class="field"><span>image *</span><input name="image" type="url" placeholder="https://example.com/category.jpg"></label>
+          <label class="field"><span>parent_id</span><input name="parent_id" type="number" placeholder="Можно оставить пустым"></label>
+          <button class="btn primary" type="submit">Создать категорию</button>
+        </form>
+      </aside>
+
+      <section class="showcase-content">
+        <div class="panel">
+          <div class="panel-head compact">
+            <div>
+              <p class="eyebrow">Posts</p>
+              <h2>Последние публикации</h2>
+            </div>
+          </div>
+          <form id="postCreateForm" class="context-form hidden">
+            <div class="context-form-head">
+              <div>
+                <p class="eyebrow">Selected category</p>
+                <h3 id="postCreateTitle">Добавить пост</h3>
+              </div>
+              <span class="method-pill" id="selectedCategoryBadge">Category</span>
+            </div>
+            <div class="form-grid">
+              <label class="field"><span>title *</span><input name="title" type="text" placeholder="Первый пост"></label>
+              <label class="field"><span>title_en *</span><input name="title_en" type="text" placeholder="First post"></label>
+              <label class="field"><span>description *</span><input name="description" type="text" placeholder="Короткое описание"></label>
+              <label class="field"><span>description_en *</span><input name="description_en" type="text" placeholder="Short description"></label>
+              <label class="field"><span>image *</span><input name="image" type="url" placeholder="https://example.com/post.jpg"></label>
+              <label class="field"><span>image_en *</span><input name="image_en" type="url" placeholder="https://example.com/post-en.jpg"></label>
+              <label class="field"><span>client_id</span><input name="client_id" type="number" placeholder="Можно оставить пустым"></label>
+            </div>
+            <button class="btn primary" type="submit">Опубликовать пост в категории</button>
+          </form>
+          <div id="postCreatePlaceholder" class="context-empty">Выберите категорию слева, чтобы появилась форма добавления поста.</div>
+          <div id="showcasePosts" class="showcase-post-grid"></div>
+        </div>
+      </section>
+
+      <aside class="panel showcase-reader">
+        <div id="showcaseArticle"></div>
+        <form id="postEditForm" class="context-form hidden">
+          <h3>Изменить выбранный пост</h3>
+          <label class="field"><span>title</span><input name="title" type="text"></label>
+          <label class="field"><span>title_en</span><input name="title_en" type="text"></label>
+          <label class="field"><span>description</span><input name="description" type="text"></label>
+          <label class="field"><span>description_en</span><input name="description_en" type="text"></label>
+          <label class="field"><span>image</span><input name="image" type="url"></label>
+          <label class="field"><span>image_en</span><input name="image_en" type="url"></label>
+          <div class="button-row">
+            <button class="btn primary" type="submit">Сохранить</button>
+            <button class="btn danger" id="deleteSelectedPostBtn" type="button">Удалить пост</button>
+          </div>
+        </form>
+        <div class="showcase-comments">
+          <h3>Комментарии</h3>
+          <form id="commentCreateForm" class="comment-compose hidden">
+            <label class="field"><span>Ваш комментарий *</span><input name="comment" type="text" placeholder="Напишите комментарий"></label>
+            <label class="field"><span>comment_en *</span><input name="comment_en" type="text" placeholder="Write a comment"></label>
+            <label class="field"><span>parent_id</span><input name="parent_id" type="number" placeholder="Ответ на комментарий, если нужно"></label>
+            <button class="btn primary" type="submit">Отправить комментарий</button>
+          </form>
+          <div id="commentCreatePlaceholder" class="context-empty">Выберите пост, чтобы появилась форма комментария.</div>
+          <div id="showcaseComments"></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/showcase.js"></script>
+</body>
+</html>

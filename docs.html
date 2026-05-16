@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Docs - TheFrontend Example</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Documentation</p>
+      <h1>Поля и маршруты API</h1>
+      <p class="muted">Короткая шпаргалка для пользователей, которые скачали пример с GitHub.</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-link" href="index.html">Панель</a>
+      <a class="nav-link" href="showcase.html">Витрина</a>
+      <a class="nav-link active" href="docs.html">Документация</a>
+      <a class="nav-link" href="examples.html">Код</a>
+    </nav>
+  </header>
+
+  <main class="docs-layout">
+    <section class="panel">
+      <h2>Как начать</h2>
+      <div class="steps">
+        <div><strong>1</strong><span>Откройте личный кабинет вашего API проекта.</span></div>
+        <div><strong>2</strong><span>Скопируйте API Base URL и token.</span></div>
+        <div><strong>3</strong><span>Вставьте их на странице «Панель» и нажмите «Сохранить».</span></div>
+        <div><strong>4</strong><span>Выберите API, действие и отправьте запрос.</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Обязательные поля</h2>
+      <div class="cards-3">
+        <article class="mini-card">
+          <h3>Category</h3>
+          <p><b>POST:</b> title, title_en, description, description_en, image</p>
+          <p><b>Optional:</b> parent_id</p>
+          <p><b>PATCH:</b> status</p>
+        </article>
+        <article class="mini-card">
+          <h3>Post</h3>
+          <p><b>POST:</b> category_id, title, title_en, description, description_en, image, image_en</p>
+          <p><b>Optional:</b> client_id</p>
+          <p><b>PATCH:</b> is_published</p>
+        </article>
+        <article class="mini-card">
+          <h3>Comment</h3>
+          <p><b>POST:</b> post_id, comment, comment_en</p>
+          <p><b>Optional:</b> parent_id</p>
+          <p><b>GET:</b> post_id нужен в query.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Все маршруты</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Назначение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>GET</td><td>/personal</td><td>Получить клиентов</td></tr>
+            <tr><td>GET</td><td>/category</td><td>Список категорий</td></tr>
+            <tr><td>GET</td><td>/category/parent</td><td>Дерево категорий</td></tr>
+            <tr><td>GET</td><td>/category/{id}</td><td>Одна категория</td></tr>
+            <tr><td>POST</td><td>/category</td><td>Создать категорию</td></tr>
+            <tr><td>PUT</td><td>/category/{id}</td><td>Изменить категорию</td></tr>
+            <tr><td>PATCH</td><td>/category/{id}</td><td>Изменить status</td></tr>
+            <tr><td>DELETE</td><td>/category/{id}</td><td>Удалить категорию</td></tr>
+            <tr><td>GET</td><td>/post</td><td>Список постов</td></tr>
+            <tr><td>GET</td><td>/post/{id}</td><td>Пост с лайками</td></tr>
+            <tr><td>GET</td><td>/post/comment/{id}</td><td>Пост с комментариями</td></tr>
+            <tr><td>POST</td><td>/post</td><td>Создать пост</td></tr>
+            <tr><td>PUT</td><td>/post/{id}</td><td>Изменить пост</td></tr>
+            <tr><td>PATCH</td><td>/post/{id}</td><td>Изменить is_published</td></tr>
+            <tr><td>DELETE</td><td>/post/{id}</td><td>Удалить пост</td></tr>
+            <tr><td>GET</td><td>/comment?post_id=ID</td><td>Комментарии поста</td></tr>
+            <tr><td>POST</td><td>/comment</td><td>Создать комментарий</td></tr>
+            <tr><td>PUT</td><td>/comment/{id}</td><td>Изменить комментарий</td></tr>
+            <tr><td>DELETE</td><td>/comment/{id}</td><td>Удалить комментарий</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
