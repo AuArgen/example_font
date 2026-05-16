@@ -61,6 +61,38 @@ function setPostPageStatus(message, type = 'info') {
   status.className = `showcase-status ${type}`;
 }
 
+function fieldError(message, fieldName) {
+  const error = new Error(message);
+  error.fieldName = fieldName;
+  return error;
+}
+
+function clearFormFeedback(form) {
+  form.querySelectorAll('.field.invalid').forEach((field) => {
+    field.classList.remove('invalid');
+  });
+
+  const message = form.querySelector('[data-form-message]');
+  if (message) {
+    message.className = 'form-message hidden';
+    message.textContent = '';
+  }
+}
+
+function showFormFeedback(form, messageText, type = 'error', fieldName = '') {
+  const message = form.querySelector('[data-form-message]');
+  if (message) {
+    message.textContent = messageText;
+    message.className = `form-message ${type}`;
+  }
+
+  if (fieldName) {
+    const input = form.elements[fieldName];
+    input?.closest('.field')?.classList.add('invalid');
+    input?.focus();
+  }
+}
+
 function escapePostPageHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -166,8 +198,8 @@ function commentFormBody(form) {
   const commentEn = form.elements.comment_en.value.trim();
   const parentRaw = form.elements.parent_id.value;
 
-  if (!comment) throw new Error('Не хватает обязательного поля: comment');
-  if (!commentEn) throw new Error('Не хватает обязательного поля: comment_en');
+  if (!comment) throw fieldError('Нужно заполнить поле: comment', 'comment');
+  if (!commentEn) throw fieldError('Нужно заполнить поле: comment_en', 'comment_en');
 
   return {
     post_id: Number(postPageState.post.id),
@@ -180,6 +212,7 @@ function commentFormBody(form) {
 async function createPostPageComment(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  clearFormFeedback(form);
 
   try {
     const body = commentFormBody(form);
@@ -194,9 +227,10 @@ async function createPostPageComment(event) {
     }
 
     form.reset();
+    showFormFeedback(form, 'Комментарий отправлен.', 'success');
     renderPostPageComments();
   } catch (error) {
-    setPostPageStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
@@ -232,7 +266,7 @@ function postEditBody(form) {
   });
 
   if (!Object.keys(body).length) {
-    throw new Error('Заполните хотя бы одно поле для изменения поста.');
+    throw fieldError('Заполните хотя бы одно поле для изменения поста.', '');
   }
 
   return body;
@@ -241,6 +275,7 @@ function postEditBody(form) {
 async function updatePostPagePost(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  clearFormFeedback(form);
 
   try {
     const body = postEditBody(form);
@@ -259,7 +294,7 @@ async function updatePostPagePost(event) {
     closeModal('postEditModal');
     renderPostPage();
   } catch (error) {
-    setPostPageStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
@@ -302,8 +337,8 @@ function commentEditBody(form) {
     parent_id: parentRaw === '' ? null : Number(parentRaw),
   };
 
-  if (!body.comment) throw new Error('Не хватает обязательного поля: comment');
-  if (!body.comment_en) throw new Error('Не хватает обязательного поля: comment_en');
+  if (!body.comment) throw fieldError('Нужно заполнить поле: comment', 'comment');
+  if (!body.comment_en) throw fieldError('Нужно заполнить поле: comment_en', 'comment_en');
 
   return body;
 }
@@ -312,6 +347,7 @@ async function updatePostPageComment(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const commentId = Number(form.elements.id.value);
+  clearFormFeedback(form);
 
   try {
     const body = commentEditBody(form);
@@ -332,7 +368,7 @@ async function updatePostPageComment(event) {
     closeModal('commentEditModal');
     renderPostPageComments();
   } catch (error) {
-    setPostPageStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
@@ -367,6 +403,16 @@ document.querySelectorAll('[data-close-modal]').forEach((button) => {
 document.querySelectorAll('.modal').forEach((modal) => {
   modal.addEventListener('click', (event) => {
     if (event.target === modal) closeModal(modal.id);
+  });
+});
+document.querySelectorAll('form').forEach((form) => {
+  form.addEventListener('input', (event) => {
+    event.target.closest('.field')?.classList.remove('invalid');
+    const message = form.querySelector('[data-form-message]');
+    if (message) {
+      message.className = 'form-message hidden';
+      message.textContent = '';
+    }
   });
 });
 

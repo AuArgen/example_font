@@ -92,6 +92,38 @@ function setShowcaseStatus(message, type = 'info') {
   status.className = `showcase-status ${type}`;
 }
 
+function fieldError(message, fieldName) {
+  const error = new Error(message);
+  error.fieldName = fieldName;
+  return error;
+}
+
+function clearFormFeedback(form) {
+  form.querySelectorAll('.field.invalid').forEach((field) => {
+    field.classList.remove('invalid');
+  });
+
+  const message = form.querySelector('[data-form-message]');
+  if (message) {
+    message.className = 'form-message hidden';
+    message.textContent = '';
+  }
+}
+
+function showFormFeedback(form, messageText, type = 'error', fieldName = '') {
+  const message = form.querySelector('[data-form-message]');
+  if (message) {
+    message.textContent = messageText;
+    message.className = `form-message ${type}`;
+  }
+
+  if (fieldName) {
+    const input = form.elements[fieldName];
+    input?.closest('.field')?.classList.add('invalid');
+    input?.focus();
+  }
+}
+
 function escapeShowcaseHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -375,7 +407,7 @@ function formToBody(form, requiredFields = []) {
       : element.value.trim();
 
     if (requiredFields.includes(element.name) && (value === '' || value === null)) {
-      throw new Error(`Не хватает обязательного поля: ${element.name}`);
+      throw fieldError(`Нужно заполнить поле: ${element.name}`, element.name);
     }
 
     if (value !== '' && value !== null) {
@@ -397,6 +429,7 @@ function clearForm(form) {
 async function createCategory(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  clearFormFeedback(form);
 
   try {
     const body = formToBody(form, ['title', 'title_en', 'description', 'description_en', 'image']);
@@ -413,19 +446,21 @@ async function createCategory(event) {
     }
 
     clearForm(form);
+    showFormFeedback(form, 'Категория создана.', 'success');
     renderShowcase();
   } catch (error) {
-    setShowcaseStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
 async function createPost(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  clearFormFeedback(form);
 
   try {
     if (!showcaseState.selectedCategoryId) {
-      throw new Error('Сначала выберите категорию.');
+      throw fieldError('Сначала выберите категорию.', '');
     }
 
     const body = formToBody(form, ['title', 'title_en', 'description', 'description_en', 'image', 'image_en']);
@@ -445,9 +480,10 @@ async function createPost(event) {
     }
 
     clearForm(form);
+    showFormFeedback(form, 'Пост опубликован.', 'success');
     renderShowcase();
   } catch (error) {
-    setShowcaseStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
@@ -455,9 +491,10 @@ async function updateSelectedPost(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const post = selectedPost();
+  clearFormFeedback(form);
 
   try {
-    if (!post) throw new Error('Сначала выберите пост.');
+    if (!post) throw fieldError('Сначала выберите пост.', '');
 
     const body = formToBody(form);
 
@@ -470,9 +507,10 @@ async function updateSelectedPost(event) {
       setShowcaseStatus('Пост изменён в API.', 'success');
     }
 
+    showFormFeedback(form, 'Изменения сохранены.', 'success');
     renderShowcase();
   } catch (error) {
-    setShowcaseStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
@@ -503,10 +541,11 @@ async function deleteSelectedPost() {
 async function createComment(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  clearFormFeedback(form);
 
   try {
     if (!showcaseState.selectedPostId) {
-      throw new Error('Сначала выберите пост.');
+      throw fieldError('Сначала выберите пост.', '');
     }
 
     const body = formToBody(form, ['comment', 'comment_en']);
@@ -522,9 +561,10 @@ async function createComment(event) {
     }
 
     clearForm(form);
+    showFormFeedback(form, 'Комментарий отправлен.', 'success');
     renderShowcase();
   } catch (error) {
-    setShowcaseStatus(error.message, 'error');
+    showFormFeedback(form, error.message, 'error', error.fieldName);
   }
 }
 
@@ -551,5 +591,15 @@ document.getElementById('postCreateForm')?.addEventListener('submit', createPost
 document.getElementById('postEditForm')?.addEventListener('submit', updateSelectedPost);
 document.getElementById('deleteSelectedPostBtn')?.addEventListener('click', deleteSelectedPost);
 document.getElementById('commentCreateForm')?.addEventListener('submit', createComment);
+document.querySelectorAll('form').forEach((form) => {
+  form.addEventListener('input', (event) => {
+    event.target.closest('.field')?.classList.remove('invalid');
+    const message = form.querySelector('[data-form-message]');
+    if (message) {
+      message.className = 'form-message hidden';
+      message.textContent = '';
+    }
+  });
+});
 
 loadShowcaseData();

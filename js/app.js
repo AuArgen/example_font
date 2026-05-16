@@ -17,6 +17,7 @@ const elements = {
   runRequestBtn: document.getElementById('runRequestBtn'),
   fillDemoBtn: document.getElementById('fillDemoBtn'),
   activeEndpoint: document.getElementById('activeEndpoint'),
+  requestFormMessage: document.getElementById('requestFormMessage'),
   messageBox: document.getElementById('messageBox'),
   tableBox: document.getElementById('tableBox'),
   jsonOutput: document.getElementById('jsonOutput'),
@@ -43,6 +44,35 @@ function setMessage(text, type = 'success') {
 function clearMessage() {
   elements.messageBox.className = 'message hidden';
   elements.messageBox.textContent = '';
+}
+
+function fieldError(message, fieldName) {
+  const error = new Error(message);
+  error.fieldName = fieldName;
+  return error;
+}
+
+function clearRequestFormFeedback() {
+  elements.apiForm.querySelectorAll('.field.invalid').forEach((field) => {
+    field.classList.remove('invalid');
+  });
+  document.getElementById('recordIdInput')?.closest('.field')?.classList.remove('invalid');
+  elements.requestFormMessage.className = 'form-message hidden';
+  elements.requestFormMessage.textContent = '';
+}
+
+function showRequestFormFeedback(message, type = 'error', fieldName = '') {
+  elements.requestFormMessage.textContent = message;
+  elements.requestFormMessage.className = `form-message ${type}`;
+
+  const input = fieldName === 'id'
+    ? elements.recordIdInput
+    : elements.apiForm.querySelector(`[name="${fieldName}"]`);
+
+  if (input) {
+    input.closest('.field')?.classList.add('invalid');
+    input.focus();
+  }
 }
 
 function renderActions() {
@@ -91,6 +121,7 @@ function fieldHtml(field, actionKey) {
 }
 
 function renderForm() {
+  clearRequestFormFeedback();
   const resource = resources[currentResource];
   const actionKey = elements.actionSelect.value;
   const action = currentAction();
@@ -106,6 +137,7 @@ function renderForm() {
 }
 
 function fillDemoValues() {
+  clearRequestFormFeedback();
   const demo = resources[currentResource].demo;
   elements.apiForm.querySelectorAll('input, select').forEach((input) => {
     input.value = demo[input.name] ?? '';
@@ -128,7 +160,7 @@ function collectBody() {
     const isRequired = field.requiredFor?.includes(actionKey);
 
     if (isRequired && (value === null || value === '')) {
-      throw new Error(`Не хватает обязательного поля: ${field.name}`);
+      throw fieldError(`Нужно заполнить поле: ${field.name}`, field.name);
     }
 
     if (action.bodyOnly && !action.bodyOnly.includes(field.name)) {
@@ -151,7 +183,7 @@ function buildPath(action, body) {
   if (action.needsId) {
     const id = elements.recordIdInput.value.trim();
     if (!id) {
-      throw new Error('Укажите ID записи.');
+      throw fieldError('Нужно заполнить поле: ID записи', 'id');
     }
     path = path.replace('{id}', id);
   }
@@ -159,7 +191,7 @@ function buildPath(action, body) {
   if (action.needsPostId) {
     const postId = body.post_id;
     if (!postId) {
-      throw new Error('Не хватает обязательного поля: post_id');
+      throw fieldError('Нужно заполнить поле: post_id', 'post_id');
     }
     path = path.replace('{post_id}', postId);
   }
@@ -220,6 +252,7 @@ function renderTable(data) {
 
 async function runRequest() {
   clearMessage();
+  clearRequestFormFeedback();
 
   try {
     const action = currentAction();
@@ -232,8 +265,9 @@ async function runRequest() {
 
     renderTable(data);
     setMessage('Запрос выполнен успешно.', 'success');
+    showRequestFormFeedback('Запрос отправлен успешно.', 'success');
   } catch (error) {
-    setMessage(error.message, 'error');
+    showRequestFormFeedback(error.message, 'error', error.fieldName);
   }
 }
 
@@ -271,6 +305,12 @@ elements.tokenInput.addEventListener('input', updateConfigStatus);
 elements.actionSelect.addEventListener('change', () => {
   renderForm();
   fillDemoValues();
+});
+elements.recordIdInput.addEventListener('input', clearRequestFormFeedback);
+elements.apiForm.addEventListener('input', (event) => {
+  event.target.closest('.field')?.classList.remove('invalid');
+  elements.requestFormMessage.className = 'form-message hidden';
+  elements.requestFormMessage.textContent = '';
 });
 elements.runRequestBtn.addEventListener('click', runRequest);
 elements.fillDemoBtn.addEventListener('click', fillDemoValues);

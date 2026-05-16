@@ -172,6 +172,43 @@ select {
   box-shadow: 0 0 0 3px rgba(20, 184, 132, 0.15);
 }
 
+.field.invalid span {
+  color: var(--red);
+}
+
+.field.invalid input,
+.field.invalid select {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+.form-message {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.form-message.error {
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.form-message.success {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.form-grid > .form-message,
+.modal-actions + .form-message {
+  grid-column: 1 / -1;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
