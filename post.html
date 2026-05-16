@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header class="topbar">
+  <header class="topbar post-topbar">
     <div>
       <p class="eyebrow">Post page</p>
       <h1 id="postPageHeader">Страница поста</h1>
@@ -24,23 +24,26 @@
   <main class="post-page">
     <a class="back-link" href="showcase.html">← Назад к витрине</a>
 
-    <section id="postPageStatus" class="showcase-status">Загружаем пост...</section>
+    <section id="postPageStatus" class="showcase-status post-status">Загружаем пост...</section>
 
-    <article class="panel post-detail">
+    <article class="post-detail minimal-post">
       <img id="postDetailImage" class="post-detail-image" src="" alt="">
       <div class="post-detail-body">
         <p class="eyebrow" id="postDetailMeta">Post</p>
         <h2 id="postDetailTitle">Пост</h2>
         <p id="postDetailDescription" class="post-detail-description"></p>
-        <div class="showcase-meta">
-          <span id="postDetailId">ID</span>
-          <span id="postDetailCategory">Category</span>
+        <div class="post-actions-line">
+          <div class="showcase-meta">
+            <span id="postDetailId">ID</span>
+            <span id="postDetailCategory">Category</span>
+          </div>
+          <button class="btn ghost" id="openPostEditBtn" type="button">Редактировать пост</button>
         </div>
       </div>
     </article>
 
     <section class="post-detail-grid">
-      <div class="panel">
+      <div class="panel minimal-panel">
         <div class="panel-head compact">
           <div>
             <p class="eyebrow">Discussion</p>
@@ -48,7 +51,7 @@
           </div>
         </div>
 
-        <form id="postPageCommentForm" class="comment-compose">
+        <form id="postPageCommentForm" class="comment-compose minimal-comment-form">
           <label class="field">
             <span>Комментарий *</span>
             <input name="comment" type="text" placeholder="Напишите комментарий">
@@ -67,7 +70,7 @@
         <div id="postPageComments"></div>
       </div>
 
-      <aside class="panel">
+      <aside class="panel minimal-panel">
         <p class="eyebrow">API usage</p>
         <h2>Что использует эта страница</h2>
         <div class="steps">
@@ -78,6 +81,51 @@
       </aside>
     </section>
   </main>
+
+  <div id="postEditModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Edit post</p>
+          <h2>Редактировать пост</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="postEditModal">×</button>
+      </div>
+      <form id="postEditModalForm" class="form-grid">
+        <label class="field"><span>title</span><input name="title" type="text"></label>
+        <label class="field"><span>title_en</span><input name="title_en" type="text"></label>
+        <label class="field"><span>description</span><input name="description" type="text"></label>
+        <label class="field"><span>description_en</span><input name="description_en" type="text"></label>
+        <label class="field"><span>image</span><input name="image" type="url"></label>
+        <label class="field"><span>image_en</span><input name="image_en" type="url"></label>
+        <div class="button-row modal-actions">
+          <button class="btn primary" type="submit">Сохранить</button>
+          <button class="btn danger" id="deletePostFromModalBtn" type="button">Удалить пост</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="commentEditModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Edit comment</p>
+          <h2>Редактировать комментарий</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="commentEditModal">×</button>
+      </div>
+      <form id="commentEditModalForm">
+        <input type="hidden" name="id">
+        <label class="field"><span>comment</span><input name="comment" type="text"></label>
+        <label class="field"><span>comment_en</span><input name="comment_en" type="text"></label>
+        <label class="field"><span>parent_id</span><input name="parent_id" type="number" placeholder="Оставьте пустым для null"></label>
+        <div class="button-row modal-actions">
+          <button class="btn primary" type="submit">Сохранить комментарий</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="js/api.js"></script>
   <script src="js/post-page.js"></script>

@@ -140,11 +140,25 @@ function renderPostPageComments() {
   }
 
   box.innerHTML = postPageState.comments.map((comment) => `
-    <div class="showcase-comment">
-      <strong>#${escapePostPageHtml(comment.id)}</strong>
+    <div class="showcase-comment minimal-comment">
+      <div class="comment-row">
+        <strong>#${escapePostPageHtml(comment.id)}</strong>
+        <div class="comment-tools">
+          <button class="text-button" type="button" data-edit-comment="${escapePostPageHtml(comment.id)}">Изменить</button>
+          <button class="text-button danger-text" type="button" data-delete-comment="${escapePostPageHtml(comment.id)}">Удалить</button>
+        </div>
+      </div>
       <p>${escapePostPageHtml(comment.comment || comment.comment_en || 'Комментарий без текста')}</p>
     </div>
   `).join('');
+
+  document.querySelectorAll('[data-edit-comment]').forEach((button) => {
+    button.addEventListener('click', () => openCommentEditModal(Number(button.dataset.editComment)));
+  });
+
+  document.querySelectorAll('[data-delete-comment]').forEach((button) => {
+    button.addEventListener('click', () => deletePostPageComment(Number(button.dataset.deleteComment)));
+  });
 }
 
 function commentFormBody(form) {
@@ -186,6 +200,174 @@ async function createPostPageComment(event) {
   }
 }
 
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function fillPostEditModal() {
+  const form = document.getElementById('postEditModalForm');
+  const post = postPageState.post;
+  if (!form || !post) return;
+
+  ['title', 'title_en', 'description', 'description_en', 'image', 'image_en'].forEach((field) => {
+    form.elements[field].value = post[field] || '';
+  });
+}
+
+function postEditBody(form) {
+  const body = {};
+  ['title', 'title_en', 'description', 'description_en', 'image', 'image_en'].forEach((field) => {
+    const value = form.elements[field].value.trim();
+    if (value) body[field] = value;
+  });
+
+  if (!Object.keys(body).length) {
+    throw new Error('Заполните хотя бы одно поле для изменения поста.');
+  }
+
+  return body;
+}
+
+async function updatePostPagePost(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+
+  try {
+    const body = postEditBody(form);
+
+    if (postPageState.demoMode || !postPageConfigReady()) {
+      Object.assign(postPageState.post, body);
+      setPostPageStatus('Пост изменён в демо-режиме.', 'info');
+    } else {
+      postPageState.post = await apiRequest(`/post/${postPageState.post.id}`, {
+        method: 'PUT',
+        body,
+      });
+      setPostPageStatus('Пост изменён в API.', 'success');
+    }
+
+    closeModal('postEditModal');
+    renderPostPage();
+  } catch (error) {
+    setPostPageStatus(error.message, 'error');
+  }
+}
+
+async function deletePostPagePost() {
+  if (!postPageState.post) return;
+
+  try {
+    if (postPageState.demoMode || !postPageConfigReady()) {
+      setPostPageStatus('Пост удалён в демо-режиме. Возвращаемся к витрине...', 'info');
+    } else {
+      await apiRequest(`/post/${postPageState.post.id}`, { method: 'DELETE' });
+      setPostPageStatus('Пост удалён из API. Возвращаемся к витрине...', 'success');
+    }
+
+    setTimeout(() => {
+      window.location.href = 'showcase.html';
+    }, 700);
+  } catch (error) {
+    setPostPageStatus(error.message, 'error');
+  }
+}
+
+function openCommentEditModal(commentId) {
+  const comment = postPageState.comments.find((item) => Number(item.id) === Number(commentId));
+  const form = document.getElementById('commentEditModalForm');
+  if (!comment || !form) return;
+
+  form.elements.id.value = comment.id;
+  form.elements.comment.value = comment.comment || '';
+  form.elements.comment_en.value = comment.comment_en || '';
+  form.elements.parent_id.value = comment.parent_id || '';
+  openModal('commentEditModal');
+}
+
+function commentEditBody(form) {
+  const parentRaw = form.elements.parent_id.value;
+  const body = {
+    comment: form.elements.comment.value.trim(),
+    comment_en: form.elements.comment_en.value.trim(),
+    parent_id: parentRaw === '' ? null : Number(parentRaw),
+  };
+
+  if (!body.comment) throw new Error('Не хватает обязательного поля: comment');
+  if (!body.comment_en) throw new Error('Не хватает обязательного поля: comment_en');
+
+  return body;
+}
+
+async function updatePostPageComment(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const commentId = Number(form.elements.id.value);
+
+  try {
+    const body = commentEditBody(form);
+
+    if (postPageState.demoMode || !postPageConfigReady()) {
+      const comment = postPageState.comments.find((item) => Number(item.id) === commentId);
+      if (comment) Object.assign(comment, body);
+      setPostPageStatus('Комментарий изменён в демо-режиме.', 'info');
+    } else {
+      await apiRequest(`/comment/${commentId}`, {
+        method: 'PUT',
+        body,
+      });
+      postPageState.comments = await apiRequest(`/comment?post_id=${postPageState.post.id}`);
+      setPostPageStatus('Комментарий изменён в API.', 'success');
+    }
+
+    closeModal('commentEditModal');
+    renderPostPageComments();
+  } catch (error) {
+    setPostPageStatus(error.message, 'error');
+  }
+}
+
+async function deletePostPageComment(commentId) {
+  try {
+    if (postPageState.demoMode || !postPageConfigReady()) {
+      postPageState.comments = postPageState.comments.filter((comment) => Number(comment.id) !== Number(commentId));
+      setPostPageStatus('Комментарий удалён в демо-режиме.', 'info');
+    } else {
+      await apiRequest(`/comment/${commentId}`, { method: 'DELETE' });
+      postPageState.comments = await apiRequest(`/comment?post_id=${postPageState.post.id}`);
+      setPostPageStatus('Комментарий удалён из API.', 'success');
+    }
+
+    renderPostPageComments();
+  } catch (error) {
+    setPostPageStatus(error.message, 'error');
+  }
+}
+
 document.getElementById('postPageCommentForm')?.addEventListener('submit', createPostPageComment);
+document.getElementById('openPostEditBtn')?.addEventListener('click', () => {
+  fillPostEditModal();
+  openModal('postEditModal');
+});
+document.getElementById('postEditModalForm')?.addEventListener('submit', updatePostPagePost);
+document.getElementById('deletePostFromModalBtn')?.addEventListener('click', deletePostPagePost);
+document.getElementById('commentEditModalForm')?.addEventListener('submit', updatePostPageComment);
+document.querySelectorAll('[data-close-modal]').forEach((button) => {
+  button.addEventListener('click', () => closeModal(button.dataset.closeModal));
+});
+document.querySelectorAll('.modal').forEach((modal) => {
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeModal(modal.id);
+  });
+});
 
 loadPostPage();
